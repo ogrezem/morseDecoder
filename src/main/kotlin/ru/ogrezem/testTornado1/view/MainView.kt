@@ -107,9 +107,24 @@ class MainView : View("Дешифратор Морзе") {
             }
         }
     }
+    private fun checkBufferAndDecode() {
+        runLater {
+            if (MorseDecoder.morseDictionary.containsKey(buffer)) {
+                outputText.value += MorseDecoder.morseDictionary[buffer]
+            }
+            buffer = ""
+            inputText.value += " "
+            handlingIsRunning = false
+        }
+    }
     // Нужно перенести обе функции в MorseController или в MorseModel
     private fun pressHandle(signal: String) {
-        buffer += signal
+        if (buffer.length < MorseDecoder.MAX_MORSE_CHAR_SIZE)
+            buffer += signal
+        else {
+            checkBufferAndDecode()
+            return
+        }
         inputText.value += if (!inputText.value.isEmpty() && inputText.value.last() == ' ')
             "| $signal"
         else
@@ -117,41 +132,22 @@ class MainView : View("Дешифратор Морзе") {
         bufferChanged = true
         if (!handlingIsRunning) {
             handlingIsRunning = true
-            runHandling()
-        }
-    }
-
-    private fun runHandling() {
-        runHandlingIsRunning = true
-
-        fun checkBufferAndDecode() {
-            runLater {
-                if (MorseDecoder.morseDictionary.containsKey(buffer)) {
-                    outputText.value += MorseDecoder.morseDictionary[buffer]
+            //runHandling()
+            runHandlingIsRunning = true
+            runAsync {
+                val millisSleepTime = 1500L
+                val sleepingStep = 100L
+                var millisNeedToSleep = millisSleepTime
+                while (millisNeedToSleep != 0L) {
+                    Thread.sleep(sleepingStep)
+                    millisNeedToSleep -= sleepingStep
+                    if (bufferChanged) {
+                        millisNeedToSleep = millisSleepTime
+                        bufferChanged = false
+                    }
                 }
-                buffer = ""
-                inputText.value += " "
+                checkBufferAndDecode()
             }
-        }
-
-        runAsync {
-            val millisSleepTime = 1500L
-            val sleepingStep = 100L
-            var millisNeedToSleep = millisSleepTime
-            while (millisNeedToSleep != 0L) {
-                Thread.sleep(sleepingStep)
-                millisNeedToSleep -= sleepingStep
-                if (bufferChanged) {
-                    millisNeedToSleep = millisSleepTime
-                    bufferChanged = false
-                }
-            }
-            runHandlingIsRunning = false
-        }
-        runAsync {
-            while (runHandlingIsRunning && (buffer.length < MorseDecoder.MAX_MORSE_CHAR_SIZE)) { }
-            checkBufferAndDecode()
-            handlingIsRunning = false
         }
     }
 
