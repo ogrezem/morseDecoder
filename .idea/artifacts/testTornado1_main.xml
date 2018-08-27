@@ -1,0 +1,20 @@
+<component name="ArtifactManager">
+  <artifact type="javafx" name="testTornado1_main">
+    <output-path>$PROJECT_DIR$/out/artifacts/testTornado1_main</output-path>
+    <properties id="javafx-properties">
+      <options>
+        <option name="appClass" value="ru.ogrezem.testTornado1.app.MyApp" />
+        <option name="description" value="" />
+        <option name="htmlPlaceholderId" value="" />
+        <option name="title" value="" />
+        <option name="vendor" value="" />
+        <option name="version" value="" />
+      </options>
+    </properties>
+    <root id="root">
+      <element id="archive" name="testTornado1_main.jar">
+        <element id="module-output" name="testTornado1_main" />
+      </element>
+    </root>
+  </artifact>
+</component>
