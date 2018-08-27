@@ -13,7 +13,6 @@ import ru.ogrezem.testTornado1.style.Styles
 import tornadofx.*
 
 class MainView : View("Дешифратор Морзе") {
-    val needToPrintLogs = false
     var morseController = find<MorseController>()
     val inputText = SimpleStringProperty("")
     val labelsWidthProperty = 200.px
@@ -27,7 +26,6 @@ class MainView : View("Дешифратор Морзе") {
     private var bufferChanged = false
 
     private var handlingIsRunning = false
-    private var runHandlingIsRunning = false
 
     override val root = gridpane {
         style {
@@ -48,7 +46,7 @@ class MainView : View("Дешифратор Морзе") {
                 columnRowIndex(0, 0)
             }
         }
-        val textLabel = label (outputText) {
+        label (outputText) {
             vgrow = Priority.ALWAYS
             gridpaneConstraints {
                 columnRowIndex(0, 1)
@@ -107,47 +105,51 @@ class MainView : View("Дешифратор Морзе") {
             }
         }
     }
-    private fun checkBufferAndDecode() {
-        runLater {
-            if (MorseDecoder.morseDictionary.containsKey(buffer)) {
-                outputText.value += MorseDecoder.morseDictionary[buffer]
-            }
-            buffer = ""
-            inputText.value += " "
-            handlingIsRunning = false
-        }
-    }
     // Нужно перенести обе функции в MorseController или в MorseModel
     private fun pressHandle(signal: String) {
+        fun checkBufferAndDecode() {
+            runLater {
+                if (MorseDecoder.morseDictionary.containsKey(buffer)) {
+                    outputText.value += MorseDecoder.morseDictionary[buffer]
+                }
+                buffer = ""
+                inputText.value += " "
+                handlingIsRunning = false
+            }
+        }
+
         if (buffer.length < MorseDecoder.MAX_MORSE_CHAR_SIZE)
             buffer += signal
         else {
             checkBufferAndDecode()
             return
         }
-        inputText.value += if (!inputText.value.isEmpty() && inputText.value.last() == ' ')
-            "| $signal"
-        else
-            signal
         bufferChanged = true
-        if (!handlingIsRunning) {
-            handlingIsRunning = true
-            //runHandling()
-            runHandlingIsRunning = true
-            runAsync {
-                val millisSleepTime = 1500L
-                val sleepingStep = 100L
-                var millisNeedToSleep = millisSleepTime
-                while (millisNeedToSleep != 0L) {
-                    Thread.sleep(sleepingStep)
-                    millisNeedToSleep -= sleepingStep
-                    if (bufferChanged) {
-                        millisNeedToSleep = millisSleepTime
-                        bufferChanged = false
-                    }
+
+        with (inputText) {
+            value += if (!value.isEmpty() && value.last() == ' ')
+                "| $signal"
+            else
+                signal
+        }
+
+        if (handlingIsRunning)
+            return
+
+        handlingIsRunning = true
+        runAsync {
+            val millisSleepTime = 1500L
+            val sleepingStep = 100L
+            var millisNeedToSleep = millisSleepTime
+            while (millisNeedToSleep != 0L) {
+                Thread.sleep(sleepingStep)
+                millisNeedToSleep -= sleepingStep
+                if (bufferChanged) {
+                    millisNeedToSleep = millisSleepTime
+                    bufferChanged = false
                 }
-                checkBufferAndDecode()
             }
+            checkBufferAndDecode()
         }
     }
 
