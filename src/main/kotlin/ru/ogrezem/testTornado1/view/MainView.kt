@@ -46,6 +46,7 @@ class MainView : View("Дешифратор Морзе") {
                 columnRowIndex(0, 0)
             }
         }
+
         label (outputText) {
             vgrow = Priority.ALWAYS
             gridpaneConstraints {
@@ -70,6 +71,7 @@ class MainView : View("Дешифратор Морзе") {
                 pressHandle("-")
             }
         }
+
         label("Ввод") {
             addClass (
                     Styles.headersLabels
@@ -82,6 +84,7 @@ class MainView : View("Дешифратор Морзе") {
                 fontSize = 20.px
             }
         }
+
         scrollpane {
             isFitToWidth = false
             style {
